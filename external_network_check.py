@@ -144,15 +144,8 @@ def get_ENs():
                         DATA[n]["tenants"][t][vrf][l3out][en]["subnets"] = list()
                 try:
                     DATA[n]["tenants"][t][vrf][l3out][en]["subnets"].append(
-                            ipaddress.ip_network(external_network.ip))
-                except ValueError:
-                    pass
-                    # TODO: Replace Host-Bit IPs with Network IPs
-                    # Example: 172.31.58.216/28 hast host bits set
-                    # Needs to be changed to 172.31.58.208/28
-                
-
-
+                            ipaddress.ip_network(external_network.ip, strict=False))             
+    
     logging.info("done getting ENs")
     #logging.info("DATA:\n{data}".format(data=pformat(DATA)))
     return None
