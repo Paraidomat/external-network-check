@@ -210,12 +210,16 @@ def analyze():
                                         (n, t, vrf, l3out, en, subnet))
 
                     if len(default_set) > 1:
-                        BROKEN.append((
-                            default_set.pop(), default_set.pop()))
+                        temp = default_set.pop()
+                        while len(default_set) > 0:
+                            BROKEN.append((
+                                temp, default_set.pop()))
 
                     if len(default6_set) > 1:
-                        BROKEN.append((
-                            default6_set.pop(), default6_set.pop()))
+                        temp = defaul6_set.pop()
+                        while len(default6_set) > 0:
+                            BROKEN.append((
+                                temp, default6_set.pop()))
 
                     combinations = itertools.combinations(tuple_list, 2)
 
