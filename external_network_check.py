@@ -261,7 +261,7 @@ def write_excel(outfile):
     ws.write(2, 5, "Subnet A")
     ws.write(2, 6, "L3OUT B")
     ws.write(2, 7, "EN B")
-    ws.write(2, 8, "Subnet B)
+    ws.write(2, 8, "Subnet B")
 
     # Excel_row
     e_r = 3
