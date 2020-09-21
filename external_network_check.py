@@ -144,7 +144,8 @@ def get_ENs():
                         DATA[n]["tenants"][t][vrf][l3out][en]["subnets"] = list()
                 try:
                     DATA[n]["tenants"][t][vrf][l3out][en]["subnets"].append(
-                            ipaddress.ip_network(external_network.ip, strict=False))             
+                            ipaddress.ip_network(external_network.ip, 
+                                    strict=False))             
     
     logging.info("done getting ENs")
     #logging.info("DATA:\n{data}".format(data=pformat(DATA)))
