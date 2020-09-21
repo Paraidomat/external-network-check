@@ -259,8 +259,9 @@ def write_excel(outfile):
     ws.write(2, 3, "L3OUT")
     ws.write(2, 4, "EN A")
     ws.write(2, 5, "Subnet A")
-    ws.write(2, 6, "EN B")
-    ws.write(2, 7, "Subnet B")
+    ws.write(2, 6, "L3OUT B")
+    ws.write(2, 7, "EN B")
+    ws.write(2, 8, "Subnet B)
 
     # Excel_row
     e_r = 3
@@ -270,11 +271,12 @@ def write_excel(outfile):
         for i in range(5):
             ws.write(e_r, i, b_r[0][i])
         ws.write(e_r, 5, b_r[0][5].with_prefixlen)
-        ws.write(e_r, 6, b_r[1][4])
-        ws.write(e_r, 7, b_r[1][5].with_prefixlen)
+        ws.write(e_r, 6, b_r[1][3])
+        ws.write(e_r, 7, b_r[1][4])
+        ws.write(e_r, 8, b_r[1][5].with_prefixlen)
         e_r += 1
 
-    ws.autofilter(2, 0, e_r, 7)
+    ws.autofilter(2, 0, e_r, 8)
 
     wb.close()
     logging.info("See {outfile} for your report".format(outfile=outfile))
