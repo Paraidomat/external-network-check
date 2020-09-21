@@ -3,6 +3,8 @@
 Is a script to check the external networks per existing VRF on the APIC in order
 to identify if the external network 0.0.0.0/0 is set more than once.
 
+This helps with [this](https://www.cisco.com/c/en/us/support/docs/cloud-systems-management/application-policy-infrastructure-controller-apic/215016-overlapping-subnets-on-l3outs-in-cisco-a.html)
+
 ## Related information:
 
 PyACI Documentation: https://pyaci.readthedocs.io/en/latest
