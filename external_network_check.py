@@ -99,12 +99,12 @@ def get_l3outs():
                 try:
                     DATA[node]["tenants"][tenant][vrf][l3out] = dict()
                 except KeyError:
-                    logging.error("could not add l3out / vrf")
-                    logging.error("node: " + node)
-                    logging.error("tenant: " + tenant)
-                    logging.error("vrf: " + vrf)
-                    logging.error("l3out: " + l3out)
-                    logging.error("l3extRsEctx.Dn: " + l3extRsEctx.Dn)
+                    logging.info("could not add l3out / vrf")
+                    logging.info("node: " + node)
+                    logging.info("tenant: " + tenant)
+                    logging.info("vrf: " + vrf)
+                    logging.info("l3out: " + l3out)
+                    logging.info("l3extRsEctx.Dn: " + l3extRsEctx.Dn)
                     pass
 
     logging.info("done getting L3OUTs")
