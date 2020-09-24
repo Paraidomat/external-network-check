@@ -12,8 +12,8 @@ from pprint import pformat
 # GLOBAL VARIABLES
 DATA = dict()
 BROKEN = list()
-STATISTICS = dict({'nodes': 0, 'tenants': 0, 'vrfs': 0, 'l3outs': 0, 'ens': 0,
-    'subnets': 0})
+STATISTICS = {'nodes': 0, 'tenants': 0, 'vrfs': 0, 'l3outs': 0, 'ens': 0,
+    'subnets': 0}
 
 def generate_apic_urls(ips=None):
     """ Generate a list of URLs and append them to APIC_URL_LIST"""
