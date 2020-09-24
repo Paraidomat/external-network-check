@@ -24,12 +24,6 @@ def generate_apic_urls(ips=None):
     url_list = list()
 
     for ip in ips:
-        logging.info("Test if {ip} is a valid IP".format(ip=ip))
-        try:
-            ipaddress.ip_address(ip)
-        except ValueError:
-            logging.error("{ip} is not a valid IP. Skipping...".format(ip=ip))
-            break
         url = "https://{ip}".format(ip=ip)
         DATA[url] = dict()
     
@@ -42,7 +36,7 @@ def get_tenant_names():
     # Get all Tenants
     logging.info("trying to get all tenants")
 
-    for node in DATA.keys():
+    for node in DATA:
         logging.info("getting tenants for {node}".format(node=node))
 
         result = DATA[node]["node"].mit.GET(
@@ -64,7 +58,7 @@ def get_vrfs():
 
     global DATA
 
-    for node in DATA.keys():
+    for node in DATA:
         for tenant in DATA[node]["tenants"]:
             
             result = DATA[node]["node"].mit.polUni().fvTenant(tenant).GET(
@@ -85,7 +79,7 @@ def get_l3outs():
 
     global DATA
 
-    for node in DATA.keys():
+    for node in DATA:
         for tenant in DATA[node]["tenants"]:
             result = DATA[node]["node"].mit.polUni().fvTenant(tenant).GET(
                     **pyaci.options.subtreeClass('l3extRsEctx'))
@@ -120,8 +114,8 @@ def get_ENs():
     global DATA
     global BROKEN
 
-    for n in DATA.keys():
-        for t in DATA[n]["tenants"].keys():
+    for n in DATA:
+        for t in DATA[n]["tenants"]:
 
             result = DATA[n]["node"].mit.polUni().fvTenant(t).\
                     GET(**pyaci.options.subtreeClass('l3extSubnet'))
@@ -131,30 +125,31 @@ def get_ENs():
                 en = external_network.Parent.name
                 l3out = external_network.Parent.Parent.name
                 vrf = DATA[n]["relation"][l3out]
-                
-                if not vrf in DATA[n]["tenants"][t].keys():
+
+                if vrf not in DATA[n]["tenants"][t]:
                     error = "Found a L3OUT with a VRF configured which "\
                             + "doesn't exist! Skipping..."
                     logging.error(error)
                     logging.error("EN: {e}".format(e=en))
                     logging.error("L3OUT: {l}".format(l=l3out))
-                    logging.error("VRF: {v]".format(v=vrf))
+                    logging.error("VRF: {v}".format(v=vrf))
                     break
 
                 try:
-                    if not en in DATA[n]["tenants"][t][vrf][l3out].keys():
+                    if en not in DATA[n]["tenants"][t][vrf][l3out]:
                         DATA[n]["tenants"][t][vrf][l3out][en] = dict()
                         DATA[n]["tenants"][t][vrf][l3out][en]["subnets"] = list()
                 except KeyError:
-                    if not l3out in DATA[n]["tenants"][t][vrf].keys():
-                        logging.error("ADDING l3out IN EN FUNCTION!")
+                    if l3out not in DATA[n]["tenants"][t][vrf]:
+                        logging.warning("ADDING l3out IN EN FUNCTION!")
                         DATA[n]["tenants"][t][vrf][l3out] = dict()
                         DATA[n]["tenants"][t][vrf][l3out][en] = dict()
                         DATA[n]["tenants"][t][vrf][l3out][en]["subnets"] = list()
-                
+
                 DATA[n]["tenants"][t][vrf][l3out][en]["subnets"].append(
-                        ipaddress.ip_network(external_network.ip, strict=False))             
-    
+                        ipaddress.ip_network(external_network.ip,
+                        strict=False))
+
     logging.info("done getting ENs")
     #logging.info("DATA:\n{data}".format(data=pformat(DATA)))
     return None
@@ -167,21 +162,21 @@ def analyze():
 
     default_net = ipaddress.ip_network('0.0.0.0/0')
     default6_net = ipaddress.ip_network('::/0')
-    for n in DATA.keys():
+    for n in DATA:
         STATISTICS['nodes'] += 1
-        for t in DATA[n]["tenants"].keys():
+        for t in DATA[n]["tenants"]:
             STATISTICS['tenants'] += 1
-            for vrf in DATA[n]["tenants"][t].keys():
+            for vrf in DATA[n]["tenants"][t]:
                 STATISTICS['vrfs'] += 1
 
                 tuple_list = list()
                 default_set = set()
                 default6_set = set()
 
-                for l3out in DATA[n]["tenants"][t][vrf].keys():
+                for l3out in DATA[n]["tenants"][t][vrf]:
                     STATISTICS['l3outs'] += 1
 
-                    for en in DATA[n]["tenants"][t][vrf][l3out].keys():
+                    for en in DATA[n]["tenants"][t][vrf][l3out]:
                         STATISTICS['ens'] += 1
 
                         for subnet in \
@@ -218,7 +213,7 @@ def analyze():
                                 temp, default_set.pop()))
 
                     if len(default6_set) > 1:
-                        temp = defaul6_set.pop()
+                        temp = default6_set.pop()
                         while len(default6_set) > 0:
                             BROKEN.append((
                                 temp, default6_set.pop()))
@@ -232,7 +227,7 @@ def analyze():
                                     c0=combi[0], c1=combi[1])
                             logging.debug(db)
 
-    STATISTICS["errors"] = len(BROKEN)
+    STATISTICS["overlaps"] = len(BROKEN)
     logging.info("Done Analyzing")
     return None
 
@@ -242,12 +237,12 @@ def summary():
     logging.info("print summary")
 
     print("ALL DONE!")
-    for key in STATISTICS.keys():
+    for key in STATISTICS:
         print("{k}: {v}".format(k=key, v=STATISTICS[key]))
 
     if not STATISTICS["subnets"] == 0:
-        print("error%: {v}".format(v=(
-            STATISTICS["errors"]/STATISTICS["subnets"]*100)))
+        print("overlap%: {v}".format(v=(
+            STATISTICS["overlaps"]/STATISTICS["subnets"]*100)))
 
     logging.info("done summarizing")
     return None
@@ -263,7 +258,7 @@ def write_excel(outfile):
     ws.write(2, 0, "Node")
     ws.write(2, 1, "Tenant")
     ws.write(2, 2, "VRF")
-    ws.write(2, 3, "L3OUT")
+    ws.write(2, 3, "L3OUT A")
     ws.write(2, 4, "EN A")
     ws.write(2, 5, "Subnet A")
     ws.write(2, 6, "L3OUT B")
@@ -314,18 +309,11 @@ def main():
     args = parser.parse_args()
 
     # If needed, set loglevel
-    if args.loglevel == "DEBUG":
-        logging.basicConfig(level=logging.DEBUG,
+    if args.loglevel:
+        logging.basicConfig(
+                level=getattr(logging, args.loglevel.upper(), 'INFO'),
                 format="%(asctime)s %(levelname)s: %(message)s")
-        logging.debug("DEBUG Mode enabled")
-    elif args.loglevel == "INFO":
-        logging.basicConfig(level=logging.INFO,
-                format="%(asctime)s %(levelname)s: %(message)s")
-        logging.info("INFO Mode enabled")
-    elif args.loglevel == "ERROR":
-        logging.basicConfig(level=logging.ERROR,
-                format="%(asctime)s %(levelname)s: %(message)s")
-        logging.error("ERROR Mode enabled")
+        logging.debug("{l} Mode enabled".format(l=args.loglevel.upper()))
 
     outfile = args.outfile
 
@@ -347,13 +335,13 @@ def main():
     # Connect to APIC
     logging.info("connecting to the APIC")
 
-    for node_url in DATA.keys():
+    for node_url in DATA:
         logging.info("creating Node-Object for {url}".format(url=node_url))
         DATA[node_url] = dict()
         DATA[node_url]["node"] = pyaci.Node(node_url)
         DATA[node_url]["relation"] = dict()
 
-    logging.info("Nodes:\n{nodes}".format(nodes=pformat(DATA.keys())))
+    logging.info("Nodes:\n{nodes}".format(nodes=pformat(DATA)))
     
     for node in DATA:
         logging.info("Logging in to Node {node}".format(
@@ -362,7 +350,7 @@ def main():
 
         DATA[node]["node"].methods.Login(args.username, password).POST() 
 
-    logging.info("Nodes: {nodes}".format(nodes=DATA.keys()))
+    logging.info("Nodes: {nodes}".format(nodes=DATA))
     
     # Get all Tenants
     get_tenant_names()
