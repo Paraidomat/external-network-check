@@ -245,8 +245,9 @@ def summary():
     for key in STATISTICS.keys():
         print("{k}: {v}".format(k=key, v=STATISTICS[key]))
 
-    print("error%: {v}".format(v=(
-        STATISTICS["errors"]/STATISTICS["subnets"]*100)))
+    if not STATISTICS["subnets"] == 0:
+        print("error%: {v}".format(v=(
+            STATISTICS["errors"]/STATISTICS["subnets"]*100)))
 
     logging.info("done summarizing")
     return None
