@@ -131,6 +131,15 @@ def get_ENs():
                 en = external_network.Parent.name
                 l3out = external_network.Parent.Parent.name
                 vrf = DATA[n]["relation"][l3out]
+                
+                if not vrf in DATA[n]["tenants"][t].keys():
+                    error = "Found a L3OUT with a VRF configured which "\
+                            + "doesn't exist! Skipping..."
+                    logging.error(error)
+                    logging.error("EN: {e}".format(e=en))
+                    logging.error("L3OUT: {l}".format(l=l3out))
+                    logging.error("VRF: {v]".format(v=vrf))
+                    break
 
                 try:
                     if not en in DATA[n]["tenants"][t][vrf][l3out].keys():
